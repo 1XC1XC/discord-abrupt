@@ -1,4 +1,4 @@
-### Built on Ubuntu/Bunsenlabs/Lubuntu Linux Debian [0.3.10]
+### Built on Ubuntu/Bunsenlabs/Lubuntu Linux Debian [0.4.11]
 ### Index.js
 The package will build a directory including a ping command.
 ```js
