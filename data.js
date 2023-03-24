@@ -1,8 +1,8 @@
 const file = require("abrupt/file")
 
 module.exports = class data { 
-    constructor() {
-        if (file.exists("./users") != "folder") {
+    constructor(data) {
+        if (((typeof data == "object") && (!Array.isArray(data))) && (file.exists("./users") != "folder")) {
             file.create("./users")
         }
     }
@@ -27,7 +27,7 @@ module.exports = class data {
 
         get(prop) {
             const data = this.content()
-            if (data.hasOwnProperty(prop)) {
+            if ((prop != undefined) && (data.hasOwnProperty(prop))) {
                 return data[prop]
             }
             return false

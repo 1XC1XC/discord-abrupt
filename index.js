@@ -1,6 +1,5 @@
 const { Client, GatewayIntentBits } = require("discord.js")
 const db = require("./data.js")
-const database = new db()
 const file = require("abrupt/file")
 
 const { path: orgin } = arguments["1"].main 
@@ -22,7 +21,7 @@ module.exports = class {
             console.log(`discord-abrupt: created ${core}`)
         }
 
-        const commands = this.getCommands(folder)
+        const commands = file.read(folder)
 
         const allCommands = {}
 
@@ -60,19 +59,38 @@ module.exports = class {
         }
 
         return (() => {
+            const database = new db(data)
             const client = new Client({
                 intents: Object.keys(GatewayIntentBits).filter(x => !Number(x) ? GatewayIntentBits[x] : null)
             })
-
+            
             client.on("ready", () => {
                 console.log(`Logged in as ${client.user.tag}`)
             })
 
             client.on("messageCreate", message => {
-                const { content, author } = message
-
+                const { content, author, channel } = message
                 if (author.bot) return
-
+                
+                const embed = {
+                    author: {
+                        name: author.username,
+                        icon_url: author.displayAvatarURL(),
+                    },
+                    footer: {
+                        text: client.user.username,
+                        icon_url: client.user.displayAvatarURL(),
+                    }
+                }
+                
+                channel.sendEmbed = ({
+                    author = embed.author,
+                    footer = embed.footer,
+                    color = 0x0099ff,
+                    timestamp = (new Date()).toISOString(),
+                    title, description, url, image, thumbnail, fields
+                }) => channel.send({embeds:[{author, footer, color, timestamp, title, description, url, image, thumbnail, fields}]})
+ 
                 if ((typeof data == "object") && (Array.isArray(data) == false)) {
                     author.data = new database.user(author, JSON.stringify(data))
                 } else if ((data != false) || (typeof data != "object") || ((typeof data == "object") && (Array.isArray(data) == true))) {
@@ -109,9 +127,5 @@ module.exports = class {
 
             return client
         })()
-    }
-
-    getCommands(data) {
-        return file.read(data)
     }
 }

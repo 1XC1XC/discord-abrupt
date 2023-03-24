@@ -8,7 +8,7 @@ new Discord({
     token: "OTU4NDgxMjk3NjQ1Mzc1NTQw.G6oYrw.D11IKieKqPq6pjXgAsXR0TourRRKyBdht-0E0k", // replace with bot token
     data: {
         cash: 100
-    }, // Default: false
+    }, // default users json data [Default: false]
     prefix: ";", // Default: !
     debug: true // Default: false
 })
@@ -39,8 +39,7 @@ Getting value from JSON array.
 module.exports = {
     names: ["cash"],
     run(message, args) {
-        const { author } = message
-        message.channel.send(author.data.get("cash"))
+        message.channel.send(String(author.data.get("cash")))
     }
 }
 ```
@@ -48,15 +47,15 @@ Setting value from JSON array.
 ```js
 module.exports = {
     names: "donate",
-    run(message, args) { // Simple Example: message.author.data.set(property, value)
-        const { author } = message
+    run(message, args) { // Simple Example: message.author.data.set(key, value)
+        const { author, channel } = message
         const { data } = author
         const current = data.get("cash")
         const value = Number(args[0]) 
         if ((value) && (value > 0) && (value <= current) && (args.length == 1)) {
             set = current - value
             data.set("cash", set)
-            message.channel.send(`cash balance: ${set}`)
+            channel.send(`cash: ${set}`)
         }
     }
 }
