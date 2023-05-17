@@ -90,7 +90,7 @@ module.exports = class {
                     timestamp = (new Date()).toISOString(),
                     title, description, url, image, thumbnail, fields
                 }) => channel.send({embeds:[{author, footer, color, timestamp, title, description, url, image, thumbnail, fields}]})
- 
+                
                 if ((typeof data == "object") && (Array.isArray(data) == false)) {
                     author.data = new database.user(author, JSON.stringify(data))
                 } else if ((data != false) || (typeof data != "object") || ((typeof data == "object") && (Array.isArray(data) == true))) {
