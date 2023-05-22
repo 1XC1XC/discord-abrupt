@@ -1,8 +1,9 @@
 const file = require("abrupt/file")
+const object = require("abrupt/object")
 
 module.exports = class data { 
     constructor(data) {
-        if (((typeof data == "object") && (!Array.isArray(data))) && (file.exists("./users") != "folder")) {
+        if (object.is(data) && (file.exists("./users") != "folder")) {
             file.create("./users")
         }
     }

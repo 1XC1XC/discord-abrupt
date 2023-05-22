@@ -1,11 +1,11 @@
-### Built on Ubuntu/Bunsenlabs/Lubuntu Linux Debian [0.4.11]
+### Built on Ubuntu/Bunsenlabs/Lubuntu Linux Debian [0.4.12]
 ### Index.js
 The package will build a directory including a ping command.
 ```js
 const Discord = require("discord-abrupt")
 
 new Discord({
-    token: "OTU4NDgxMjk3NjQ1Mzc1NTQw.G6oYrw.D11IKieKqPq6pjXgAsXR0TourRRKyBdht-0E0k", // replace with bot token
+    token: "TOKEN", // replace with bot token
     data: {
         cash: 100
     }, // default users json data [Default: false]
@@ -56,6 +56,118 @@ module.exports = {
             set = current - value
             data.set("cash", set)
             channel.send(`cash: ${set}`)
+        }
+    }
+}
+```
+### Beta MongoDB Support
+Example of MongoDB with discord-abrupt
+```js
+const mongoose = require("mongoose")
+const Discord = require("discord-abrupt")
+
+new Discord({
+    token: "TOKEN", // replace with bot token
+    data: {
+        mongoose,
+        type: "mongodb",
+        context: {
+            url: "mongodb+srv://user:password@example.com/", // replace with URL created with the MongoDB site 
+            dbName: "database",
+            collections: {
+                users: {
+                    scheme: {
+                        id: String,
+                        Balance: Number
+                    },
+                    on: async (message, isCommand) => { // this function can be used for management of user data, the applications of this function is for creating a users data through a command or automatically.
+                        const { content, channel, author } = message
+                        const { id, data: { Users } } = author
+                        const [ command, ...args ] = content.slice(1).split(" ")
+
+                        const user = await Users.findOne({ id })
+
+                        if (user == null) {
+                            if ((command == "start") && (args.length == 0)) {
+                                return new Users({
+                                    id,
+                                    Balance: 1000
+                                }).save()
+                            } else {
+                                if (isCommand) { // isCommand argument is used to understand if the user is trying to use your commands instead of random text after the prefix. (its kinda scuffed im sorry)
+                                    channel.send("Please use the '!start' command to begin using the bot.")
+                                }
+                                return false // returning false will prevent a command from being called when a user doesn't have data
+                            }
+                        } else {
+                            return user
+                        }
+                        // basically you need to return a individual user or false, the individual user is passed to the author.data object so you can manipulate there data in commands. 
+                    }
+                }
+            },
+        }
+    }
+})
+```
+Extension of the example using the MongoDB database to create a economy.
+
+-- Coinflip
+```js
+// Path: ./commands/coinflip.js
+const rand = require("abrupt/rand")
+const { comma } = require("abrupt/string")
+
+const types = ["heads", "tails"]
+module.exports = {
+    names: ["cf", "coinflip"],
+    run(message, args) {
+        const { author, channel } = message
+        const { data: { User } } = author
+        
+        const [ type, amount ] = args.map(x => Number(x) || x)
+
+        if ((args.length != 2) || (!Number(amount))) {
+            return
+        }
+
+        if (types.indexOf(type) == -1) {
+            channel.send("Please use 'heads' or 'tails' for your bet.")
+            return
+        }
+
+        if (amount > User.Balance) {
+            channel.send("Sorry, but you cannot place that bet. Your current balance is not sufficient.")
+            return
+        }
+
+        if (amount <= 0) {
+            return
+        }
+
+        if ((types[rand.int(0,1)] == type)) {
+            User.Balance += amount
+        } else {
+            User.Balance -= amount
+        }
+
+        User.save()
+
+        channel.send(`Balance: ${comma(User.Balance, "$")}`)
+    }
+}
+```
+-- Balance
+```js
+// Path: ./commands/balance.js
+const string = require("abrupt/string")
+module.exports = {
+    names: ["bal", "balance"],
+    run(message, args) {
+        const { author, channel } = message
+        const { data: { User } } = author
+        if (args == 0) {
+            channel.send(`Balance: ${string.comma(User.Balance, "$")}`)
         }
     }
 }
