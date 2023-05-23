@@ -64,7 +64,7 @@ module.exports = class {
                 schemes: {}
             }
 
-            if ((data != false) && (object.is(data))) {
+            if ((data != false) && (object.is(data)) && data.context) {
                 const { context: { url, dbName, collections }, mongoose } = data
                 if (mongoose && string.is(url, dbName)) {
                     await mongoose.connect(url, { dbName })
@@ -174,7 +174,7 @@ module.exports = class {
                                     names = [names, named]
                                 } 
                                 
-                                if (names.includes(name)) {
+                                if (names && names.includes(name)) {
                                     run(message, args)
                                     break
                                 }

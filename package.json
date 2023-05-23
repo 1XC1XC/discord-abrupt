@@ -1,6 +1,6 @@
 {
   "name": "discord-abrupt",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "description": "Discord API Simplified",
   "main": "index.js",
   "scripts": {
