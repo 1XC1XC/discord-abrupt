@@ -1,4 +1,4 @@
-### Built on Ubuntu/Bunsenlabs/Lubuntu Linux Debian [0.4.13]
+### Built on Ubuntu/Bunsenlabs/Lubuntu Linux Debian [0.4.14]
 ### Index.js
 The package will build a directory including a ping command.
 ```js
@@ -66,6 +66,7 @@ Example of MongoDB with discord-abrupt
 const mongoose = require("mongoose")
 const Discord = require("discord-abrupt")
 
+
 new Discord({
     token: "TOKEN", // replace with bot token
     data: {
@@ -80,8 +81,8 @@ new Discord({
                         id: String,
                         Balance: Number
                     },
-                    on: async (message, isCommand) => { // this function can be used for management of user data, the applications of this function is for creating a users data through a command or automatically.
-                        const { content, channel, author } = message
+                    on: async (message) => { // this function can be used for management of user data, the applications of this function is for creating a users data through a command or automatically.
+                        const { metadata: { keyword }, content, channel, author } = message
                         const { id, data: { Users } } = author
                         const [ command, ...args ] = content.slice(1).split(" ")
 
@@ -94,15 +95,14 @@ new Discord({
                                     Balance: 1000
                                 }).save()
                             } else {
-                                if (isCommand) { // isCommand argument is used to understand if the user is trying to use your commands instead of random text after the prefix. (its kinda scuffed im sorry)
+                                if (keyword) { // keyword represents if a command is being used, so you can detect if a user typed a command instead of random text after the prefix.
                                     channel.send("Please use the '!start' command to begin using the bot.")
                                 }
-                                return false // returning false will prevent a command from being called when a user doesn't have data
+                                return false // false return will stop a command from being called after this function runs.
                             }
                         } else {
                             return user
                         }
-                        // basically you need to return a individual user or false, the individual user is passed to the author.data object so you can manipulate there data in commands. 
                     }
                 }
             },

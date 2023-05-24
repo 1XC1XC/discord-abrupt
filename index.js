@@ -105,8 +105,7 @@ module.exports = class {
                 client.on("messageCreate", async message => {
                     const { content, author, channel } = message
                     if (author.bot) return
-                    
-                    
+
                     const embed = {
                         author: {
                             name: author.username,
@@ -131,7 +130,13 @@ module.exports = class {
 
                         const commandKeys = Object.keys(allCommands)
                         const commandValues = Object.values(allCommands).map((x, i) => x.names || commandKeys[i]).filter(x => x).flat()
-                        const isCommand = commandValues.includes(name)
+                        const keyword = commandValues.includes(name)
+
+                        message.metadata = {
+                            client,
+                            prefix,
+                            keyword
+                        }
 
                         author.data = {}
                         if ((data) && (object.is(data))) {
@@ -144,11 +149,10 @@ module.exports = class {
                                 if (mongoose && dbconfig.connected && schemes.users) {
                                     const { users: { scheme, on } } = schemes
                                     Object.assign(author.data, { Users: scheme })
-                                    const User = await on(message, isCommand)                                    
 
-                                    if (User === false) {
-                                        return
-                                    }
+                                    const User = await on(message)                                    
+                                    if (User === false) return
+
                                     Object.assign(author.data, { User })
                                 }
                             }
@@ -156,7 +160,7 @@ module.exports = class {
                             if (debug) console.log("discord-abrupt: error creating default user data")
                         }
 
-                        if (!isCommand) {
+                        if (!keyword) {
                             return
                         }
 
