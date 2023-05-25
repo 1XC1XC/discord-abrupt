@@ -90,10 +90,7 @@ new Discord({
 
                         if (user == null) {
                             if ((command == "start") && (args.length == 0)) {
-                                return new Users({
-                                    id,
-                                    Balance: 1000
-                                }).save()
+                                return new Users({ id, Balance: 1000 }).save()
                             } else {
                                 if (keyword) { // keyword represents if a command is being used, so you can detect if a user typed a command instead of random text after the prefix.
                                     channel.send("Please use the '!start' command to begin using the bot.")
