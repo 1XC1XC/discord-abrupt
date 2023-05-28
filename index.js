@@ -3,6 +3,7 @@ const db = require("./data.js")
 const file = require("abrupt/file")
 const string = require("abrupt/string")
 const object = require("abrupt/object")
+const { isAsync } = require("abrupt/function")
 
 const { path: orgin } = arguments["1"].main 
 const { readFile } = require("fs")
@@ -103,7 +104,7 @@ module.exports = class {
                 })
                 
                 client.on("messageCreate", async message => {
-                    const { content, author, channel } = message
+                    const { content, author, channel, guild } = message
                     if (author.bot) return
 
                     const embed = {
@@ -117,21 +118,33 @@ module.exports = class {
                         }
                     }
                     
-                    channel.sendEmbed = ({
+                    const Embed = ({
                         author = embed.author,
                         footer = embed.footer,
                         color = 0x0099ff,
                         timestamp = (new Date()).toISOString(),
                         title, description, url, image, thumbnail, fields
-                    }) => channel.send({embeds:[{author, footer, color, timestamp, title, description, url, image, thumbnail, fields}]})
+                    }) => {
+                        return {embeds:[{author, footer, color, timestamp, title, description, url, image, thumbnail, fields}]}
+                    }
                     
+                    channel.sendEmbed = (...args) => channel.send(Embed(...args))
+                    client.getMember = async id => {
+                        if (string.is(id)) {
+                            const user = guild.members.cache.get(id)
+                            if (object.is(user)) user.sendEmbed = (...args) => user.send(Embed(...args))
+                            return user
+                        }
+                        return false
+                    }   
+
                     if ((content) && (content.startsWith(prefix))) {
                         const [name, ...args] = content.slice(1).toLowerCase().split(" ")
 
                         const commandKeys = Object.keys(allCommands)
                         const commandValues = Object.values(allCommands).map((x, i) => x.names || commandKeys[i]).filter(x => x).flat()
                         const keyword = commandValues.includes(name)
-
+                        
                         message.metadata = {
                             client,
                             prefix,
@@ -168,7 +181,12 @@ module.exports = class {
                             const call = allCommands[named]
 
                             if ((name == named) && (typeof call == "function")) {
-                                call(message, args)
+                                const async = isAsync(call)
+                                if (async) {
+                                    await call(message, args)
+                                } else {
+                                    call(message, args)
+                                }
                                 break
                             }
                             
@@ -179,7 +197,12 @@ module.exports = class {
                                 } 
                                 
                                 if (names && names.includes(name)) {
-                                    run(message, args)
+                                    const async = isAsync(call)
+                                    if (async) {
+                                        await run(message, args)
+                                    } else {
+                                        run(message, args)
+                                    }
                                     break
                                 }
                             }
